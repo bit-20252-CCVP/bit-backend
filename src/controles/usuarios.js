@@ -1,14 +1,17 @@
+import bcrypt from 'bcryptjs';
 import UsuarioModel from '../modelos/usuarios.js';
+import { getToken } from '../utils/token.js'
 
 const UsuariosController = {
     //CREATE
   create: async (req, res) => {
     try {
       const { nombreUsuario, correo, contrasena, confContrasena } = req.body;
+      const encryptedContrasena = await bcrypt.hash(contrasena, 10);
       const newUsuario = new UsuarioModel({
         nombreUsuario,
         correo,
-        contrasena,
+        contrasena: encryptedContrasena,
         confContrasena
       });
       const usuarioCreated = await newUsuario.save();
@@ -119,6 +122,58 @@ const UsuariosController = {
       res.status(500).json({
         allOK: false,
         message: 'Error eliminando usuario',
+        data: error.message,
+      });
+    }
+  },
+
+
+//Loguear al usuario
+  login: async (req, res) => {
+    try {
+      const { username, contrasena } = req.body;
+      const usuarioFound = await UsuarioModel.findOne({ correo: username });
+      if (!usuarioFound) {
+        res.status(401).json({
+          allOK: false,
+          message: 'Unauthorized.',
+          data: null,
+        });
+      } else {
+        const validContrasena = await bcrypt.compare(
+          contrasena,
+          usuarioFound.contrasena
+        );
+        if (validContrasena) {
+          const token = await getToken({
+            id: usuarioFound._id,
+            nombreUsuario: usuarioFound.nombreUsuario,
+          });
+          if (token) {
+            res.status(200).json({
+              allOK: true,
+              message: 'Welcome!',
+              data: token,
+            });
+          } else {
+            res.status(200).json({
+              allOK: false,
+              message: 'An error occurred, please try again.',
+              data: null,
+            });
+          }
+        } else {
+          res.status(401).json({
+            allOK: false,
+            message: 'Unauthorized.',
+            data: null,
+          });
+        }
+      }
+    } catch (error) {
+      res.status(500).json({
+        allOK: false,
+        message: 'Error registering user.',
         data: error.message,
       });
     }
