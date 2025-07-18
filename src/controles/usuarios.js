@@ -8,11 +8,12 @@ const UsuariosController = {
     try {
       const { nombreUsuario, correo, contrasena, confContrasena } = req.body;
       const encryptedContrasena = await bcrypt.hash(contrasena, 10);
+      const encryptedConfContrasena = await bcrypt.hash(confContrasena, 10);
       const newUsuario = new UsuarioModel({
         nombreUsuario,
         correo,
         contrasena: encryptedContrasena,
-        confContrasena
+        confContrasena: encryptedConfContrasena,
       });
       const usuarioCreated = await newUsuario.save();
       res.status(201).json({
