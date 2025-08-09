@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import UsuarioModel from '../modelos/usuarios.js';
 import { getToken } from '../utils/token.js'
 
-const UsuariosController = {
+export const UsuariosController = {
     //CREATE
   create: async (req, res) => {
     try {

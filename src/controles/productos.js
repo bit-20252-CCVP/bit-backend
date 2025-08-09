@@ -1,6 +1,6 @@
 import ProductoModel from '../modelos/productos.js';
 
-const ProductosController = {
+export const ProductosController = {
     //CREATE
   create: async (req, res) => {
     try {
